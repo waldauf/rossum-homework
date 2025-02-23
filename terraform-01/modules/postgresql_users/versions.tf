@@ -15,9 +15,9 @@ terraform {
 }
 
 provider "postgresql" {
-  host     = "localhost"
-  port     = 5432
-  user     = "root"
-  password = "root"
+  host     = var.postgres_host
+  port     = var.postgres_port
+  username = var.postgres_root
+  password = var.postgres_root_password
   sslmode  = "disable"
 }

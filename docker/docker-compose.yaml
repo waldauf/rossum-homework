@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: my_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres_db
+    ports:
+      - "127.0.0.1:5432:5432"  # Restrict access to localhost
+    volumes:
+      # - pg_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

@@ -8,44 +8,81 @@ Please publish your solution in a publicly available git repository. All code, s
 
 ## Task 1 - Single Deployment Setup
 
-- [ ] Create a docker-compose.yml file that:
- - [ ] Runs a PostgreSQL database
- - [ ] Makes it accessible only from localhost
- - [ ] Sets up root password (can be visible in git)
-- [ ] Create a Terraform module that:
-  - [ ] Creates 3 databases
-  - [ ] Creates 3 pairs of users (each with full access to one database)
-  - [ ] Creates 1 read-only user with access to all databases
-  - [ ] Manages secure passwords (must not be visible in git)
-  - [ ] Can use local terraform state
+- [x] Create a docker-compose.yml file that:
+ - [x] Runs a PostgreSQL database
+ - [x] Makes it accessible only from localhost
+ - [x] Sets up root password (can be visible in git)
+- [x] Create a Terraform module that:
+  - [x] Creates 3 databases
+  - [x] Creates 3 pairs of users (each with full access to one database)
+  - [x] Creates 1 read-only user with access to all databases
+  - [x] Manages secure passwords (must not be visible in git)
+  - [x] Can use local terraform state
+
+## Verifying created users and databases
+
+```bash
+$ psql -h localhost -p 5432 -U root -d postgres -c "\l"
+List of databases
+   Name    |  Owner   | Encoding | Collate | Ctype |  Access privileges  
+-----------+----------+----------+---------+-------+---------------------
+ app1_db   | postgres | UTF8     | C       | C     | =Tc/postgres       +
+           |          |          |         |       | postgres=CTc/postgres+
+           |          |          |         |       | app1_user=CTc/postgres+
+           |          |          |         |       | readonly_user=c/postgres
+ app2_db   | postgres | UTF8     | C       | C     | =Tc/postgres       +
+           |          |          |         |       | postgres=CTc/postgres+
+           |          |          |         |       | app2_user=CTc/postgres+
+           |          |          |         |       | readonly_user=c/postgres
+ app3_db   | postgres | UTF8     | C       | C     | =Tc/postgres       +
+           |          |          |         |       | postgres=CTc/postgres+
+           |          |          |         |       | app3_user=CTc/postgres+
+           |          |          |         |       | readonly_user=c/postgres
+$
+$ psql -h localhost -p 5432 -U postgres postgres -c "\du"
+ Role name     |                         Attributes                         
+---------------+------------------------------------------------------------
+ app1_user     | 
+ pp2_user     | 
+ app3_user     | 
+ postgres      | Superuser, Create role, Create DB, Replication, Bypass RLS
+ readonly_user |
+```
+
+
 
 ## Task 2 - Multiple Deployments
 
-- [ ] Extend docker-compose.yml to:
-  - [ ] Run multiple PostgreSQL instances (suggested 3)
-  - [ ] Each instance on different ports
-  - [ ] Each instance simulates a separate deployment/AWS account
-- [ ] Apply the same Terraform configuration to each instance:
- - [ ] Same database and user structure
- - [ ] Unique passwords for each instance
- - [ ] Should be easily scalable to add more instances
+- [] Extend docker-compose.yml to:
+  - [] Run multiple PostgreSQL instances (suggested 3)
+  - [] Each instance on different ports
+  - [] Each instance simulates a separate deployment/AWS account
+- [] Apply the same Terraform configuration to each instance:
+ - [] Same database and user structure
+ - [] Unique passwords for each instance
+ - [] Should be easily scalable to add more instances
 
 ## Key Requirements:
 
-- [ ] Everything must run locally using Docker/Docker Compose
-- [ ] No cloud services should be used
-- [ ] Solution must be in a public git repository
-- [ ] All manual steps must be documented
-- [ ] Each task should be separate commits
+- [] Everything must run locally using Docker/Docker Compose
+- [] No cloud services should be used
+- [x] Solution must be in a public git repository
+- [] All manual steps must be documented
+- [] Each task should be separate commits
+  - [] Print of all commits before squashing
+  - [] Squash commits for each task
 
       
 ## NICE TO HAVE
-- [ ] Password for the database users can be created by Terraform's `random` provider.
+- [ ] Password generation
+  - Passwords for all users will be created by Terraform's `random_password` provider.
   - Need to have access to external storage where the password will be stored.
-  - Password will be stored in tfstate file.
-- [ ] How to manage passwords - don't be public
-  - Can be managed by CICD pipeline where the password will be loaded from an external vault.
+  - Passwords are stored in tfstate file.
   - Terraform statefile cannot be shared publicly, better to use backend storage.
+- [ ] How to manage passwords - don't be public
+  - If the passwords are stored in 3rd party service, we would use appropriate resource (i.e. Vault)
+  - Can be managed by CICD pipeline where the password will be loaded from an external vault.
+  - Passwords shouldn't be stored in tfstate file
 - [ ] Terraform statefile should be stored in some shared repository.
   - In this case I removed it from git repository due to possible password leakage.
 - [ ] GitHub Acton
@@ -57,7 +94,9 @@ Please publish your solution in a publicly available git repository. All code, s
     - [ ] Run Terraform apply
   
 
+# What doesn't work
 
+- Set privileges for users. 
 
 
 
@@ -65,11 +104,22 @@ Please publish your solution in a publicly available git repository. All code, s
 
 ## Prerequsities
 
-Before you start check:
-- docker
-  - docker service is running: `systemctl status docker.service `
-- podman
+1. Start PostgreSQL instance in `./docker` dir (be sure that `docker.service` is running):
+  - `cd rossum-homework`
+  - `cd docker && docker-compose up -d`
+2. For 1st task switch to the dir `terraform-01` and:
+  - `cd terraform-01`
+  - Create file `terraform.tfvars` that will contain connection specs to the local PostgreSQL instance:
 
+  ```
+    cat > terraform.tfvars <<-EOF
+    # PostgreSQL connection specs
+    postgres_root          = "root"
+    postgres_root_password = "root"
+    postgres_host          = "127.0.0.1"
+    postgres_port          = 5432
+    EOF
+  ```
 ## Terraform
 
 Before you start you need to initialize Terraform environment:
@@ -77,11 +127,26 @@ Before you start you need to initialize Terraform environment:
 terraform init
 ```
 
+## List of created users and passwords
+This command work just in case that:
+1. User & password pairs are printed to `terraform.tfstate` file.
+2. You have access to `terraform.tfstate` file.
+
+Command:
+```bash
+jq -r '.outputs.all_users_passwords.value | to_entries[] | "\(.key) => \(.value)"' terraform.tfstate
+```
+
 ## PostgreSQL
 
-Check if you can connect to PostgreSQL:
+Connection for the `root`:
+```bash
+  psql -h localhost -U root -d postgres
 ```
-  psql -h 127.0.0.1 -U root -d postgres
+
+Check if you can connect to PostgreSQL with each created user:
+```
+  psql -h localhost -U <user> -d <database>
 ```
 * `-h` ... hostname
 * `-U` ... user
@@ -109,6 +174,9 @@ Check privilegies for users:
 Connection to the server: `psql -h 127.0.0.1 -U root -d postgres`
 
 ## Table of commands
+
+Source - PostgreSQL [documentation](https://www.postgresql.org/docs/12/ddl-priv.html#PRIVILEGE-ABBREVS-TABLE)
+
 | `\l` | list all databases |
 | `\c <db-name>` | switch to antoher database |
 | `\du` | list all users |

@@ -1,3 +1,23 @@
+variable "postgres_root" {
+  type        = string
+  description = "postgres super user"
+}
+
+variable "postgres_root_password" {
+  type        = string
+  description = "postgres super user password"
+}
+
+variable "postgres_host" {
+  type        = string
+  description = "postgres host"
+}
+
+variable "postgres_port" {
+  type        = number
+  description = "postgres port"
+}
+
 variable "user-ro" {
   type        = string
   description = "read only user for all databases"
@@ -39,5 +59,12 @@ output "all_users_passwords" {
   sensitive = true
 }
 
+
+resource "postgresql_database" "databases" {
+  for_each = toset(var.database_names)
+
+  name  = each.key
+  owner = var.postgres_root
+}
 
 

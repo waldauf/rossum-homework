@@ -8,10 +8,10 @@ Please publish your solution in a publicly available git repository. All code, s
 
 ## Task 1 - Single Deployment Setup
 
-- [ ] Create a docker-compose.yml file that:
- - [ ] Runs a PostgreSQL database
- - [ ] Makes it accessible only from localhost
- - [ ] Sets up root password (can be visible in git)
+- [DONE] Create a docker-compose.yml file that:
+ - [DONE] Runs a PostgreSQL database
+ - [DONE] Makes it accessible only from localhost
+ - [DONE] Sets up root password (can be visible in git)
 - [ ] Create a Terraform module that:
   - [ ] Creates 3 databases
   - [ ] Creates 3 pairs of users (each with full access to one database)

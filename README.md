@@ -15,9 +15,9 @@ Please publish your solution in a publicly available git repository. All code, s
 - [] Create a Terraform module that:
   - [x] Creates 3 databases
   - [x] Creates 3 pairs of users (each with full access to one database)
-  - [] Creates 1 read-only user with access to all databases
-  - [] Manages secure passwords (must not be visible in git)
-  - [] Can use local terraform state
+  - [x] Creates 1 read-only user with access to all databases
+  - [x] Manages secure passwords (must not be visible in git)
+  - [x] Can use local terraform state
 
 ## Task 2 - Multiple Deployments
 
@@ -34,18 +34,23 @@ Please publish your solution in a publicly available git repository. All code, s
 
 - [] Everything must run locally using Docker/Docker Compose
 - [] No cloud services should be used
-- [] Solution must be in a public git repository
+- [x] Solution must be in a public git repository
 - [] All manual steps must be documented
 - [] Each task should be separate commits
+  - [] Print of all commits before squashing
+  - [] Squash commits for each task
 
       
 ## NICE TO HAVE
-- [ ] Password for the database users can be created by Terraform's `random` provider.
+- [ ] Password generation
+  - Passwords for all users will be created by Terraform's `random_password` provider.
   - Need to have access to external storage where the password will be stored.
-  - Password will be stored in tfstate file.
-- [ ] How to manage passwords - don't be public
-  - Can be managed by CICD pipeline where the password will be loaded from an external vault.
+  - Passwords are stored in tfstate file.
   - Terraform statefile cannot be shared publicly, better to use backend storage.
+- [ ] How to manage passwords - don't be public
+  - If the passwords are stored in 3rd party service, we would use appropriate resource (i.e. Vault)
+  - Can be managed by CICD pipeline where the password will be loaded from an external vault.
+  - Passwords shouldn't be stored in tfstate file
 - [ ] Terraform statefile should be stored in some shared repository.
   - In this case I removed it from git repository due to possible password leakage.
 - [ ] GitHub Acton
@@ -57,7 +62,9 @@ Please publish your solution in a publicly available git repository. All code, s
     - [ ] Run Terraform apply
   
 
+# What doesn't work
 
+- Set privileges for users. 
 
 
 
@@ -77,11 +84,26 @@ Before you start you need to initialize Terraform environment:
 terraform init
 ```
 
+## List of created users and passwords
+This command work just in case that:
+1. User & password pairs are printed to `terraform.tfstate` file.
+2. You have access to `terraform.tfstate` file.
+
+Command:
+```bash
+jq -r '.outputs.all_users_passwords.value | to_entries[] | "\(.key): \(.value)"' terraform.tfstate
+```
+
 ## PostgreSQL
 
-Check if you can connect to PostgreSQL:
+Connection for the `root`:
+```bash
+  psql -h localhost -U root -d postgres
 ```
-  psql -h 127.0.0.1 -U root -d postgres
+
+Check if you can connect to PostgreSQL with each created user:
+```
+  psql -h localhost -U <user> -d <database>
 ```
 * `-h` ... hostname
 * `-U` ... user
@@ -109,6 +131,9 @@ Check privilegies for users:
 Connection to the server: `psql -h 127.0.0.1 -U root -d postgres`
 
 ## Table of commands
+
+Source - PostgreSQL [documentation](https://www.postgresql.org/docs/12/ddl-priv.html#PRIVILEGE-ABBREVS-TABLE)
+
 | `\l` | list all databases |
 | `\c <db-name>` | switch to antoher database |
 | `\du` | list all users |

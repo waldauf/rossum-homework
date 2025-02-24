@@ -1,79 +1,20 @@
-# locals {
-#   name = readonly_user
-# }
-
-variable "postgres_root" {
-  type        = string
-  description = "postgres super user"
-}
-
-variable "postgres_root_password" {
-  type        = string
-  description = "postgres super user password"
-}
-
-variable "postgres_host" {
-  type        = string
-  description = "postgres host"
-}
-
-variable "postgres_port" {
-  type        = number
-  description = "postgres port"
-}
-
-variable "user-ro" {
-  type        = string
-  description = "read only user for all databases"
-  default     = "user-ro"
-  sensitive   = true
-}
-
-variable "database_names" {
-  type        = list(string)
-  description = "list of database names to create"
-  default     = ["app1_db", "app2_db", "app3_db"]
-}
-
-
-variable "user_database_map" {
-  type        = map(string)
-  description = "map of users to their corresponding databases"
-  default = {
-    "app1_user" = "app1_db"
-    "app2_user" = "app2_db"
-    "app3_user" = "app3_db"
-  }
-}
-
 # Geneate random password for users
 # https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
 resource "random_password" "user_passwords" {
   for_each = toset(
     concat(
       keys(var.user_database_map),
-      ["user-ro"]
+      ["ro-user"]
   ))
 
   length  = 16
   special = true
 }
 
-output "all_users_passwords" {
-  value     = { for user, password in random_password.user_passwords : user => password.result }
-  sensitive = true
-}
 
-# Create users
-# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role
-resource "postgresql_role" "app_users" {
-  for_each = var.user_database_map
-
-  name  = each.key
-  login = true
-  # password = random_passwords.app_users.[each.key].result
-  password = random_password.user_passwords[each.key].result
-}
+###############################################################################
+### CREATING DATABASES IN Postgres ############################################
+###############################################################################
 
 # Create databases
 # https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_database
@@ -86,10 +27,37 @@ resource "postgresql_database" "databases" {
   owner = lookup(var.user_database_map, each.key, var.postgres_root)
 }
 
+###############################################################################
+### CREATING USERS IN Postgres ################################################
+###############################################################################
+
+# Create app users
+# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role
+resource "postgresql_role" "app_users" {
+  for_each = var.user_database_map
+
+  name     = each.key
+  login    = true
+  password = random_password.user_passwords[each.key].result
+}
+
+# Create readonly user
+resource "postgresql_role" "ro-user" {
+  name     = var.ro-user
+  login    = true
+  password = random_password.user_passwords[var.ro-user].result
+}
+
+
+
+###############################################################################
+### GRANT PRIVILEGES IN Postgres ##############################################
+###############################################################################
+
 
 # Grant privileges to app users
 # https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_grant
-resource "postgresql_grant" "app_users" {
+resource "postgresql_grant" "app_privileges" {
   for_each = var.user_database_map
 
   database    = each.value
@@ -103,3 +71,62 @@ resource "postgresql_grant" "app_users" {
     postgresql_role.app_users
   ]
 }
+
+# Grant privilege to readonly user for CONNECT to all databases
+resource "postgresql_grant" "ro_privileges" {
+  for_each = var.user_database_map
+
+  database    = each.value
+  role        = var.ro-user
+  schema      = "public"
+  object_type = "database"
+  privileges  = ["CONNECT"]
+
+  depends_on = [
+    postgresql_database.databases,
+    postgresql_role.ro-user
+  ]
+}
+
+# Grant privilege to readonly user for USAGE of all schemas
+resource "postgresql_grant" "ro_schema_privileges" {
+  for_each = var.user_database_map
+
+  database    = each.value
+  role        = var.ro-user
+  schema      = "public"
+  object_type = "schema"
+  privileges  = ["USAGE"]
+
+  depends_on = [
+    postgresql_database.databases,
+    postgresql_role.ro-user
+  ]
+}
+
+# Grant privilege to readonly user for SELECT to all tables
+resource "postgresql_grant" "ro_table_privileges" {
+  for_each = var.user_database_map
+
+  database    = each.value
+  role        = var.ro-user
+  schema      = "public"
+  object_type = "table"
+  privileges  = ["SELECT"]
+
+  depends_on = [
+    postgresql_database.databases,
+    postgresql_role.ro-user
+  ]
+}
+
+
+###############################################################################
+### OUTPUT OF ALL USERS & PASSWD PAIRS ########################################
+###############################################################################
+
+output "all_users_passwords" {
+  value     = { for user, password in random_password.user_passwords : user => password.result }
+  sensitive = true
+}
+

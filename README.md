@@ -91,7 +91,7 @@ This command work just in case that:
 
 Command:
 ```bash
-jq -r '.outputs.all_users_passwords.value | to_entries[] | "\(.key): \(.value)"' terraform.tfstate
+jq -r '.outputs.all_users_passwords.value | to_entries[] | "\(.key) => \(.value)"' terraform.tfstate
 ```
 
 ## PostgreSQL

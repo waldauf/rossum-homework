@@ -8,35 +8,35 @@ Please publish your solution in a publicly available git repository. All code, s
 
 ## Task 1 - Single Deployment Setup
 
-- [DONE] Create a docker-compose.yml file that:
- - [DONE] Runs a PostgreSQL database
- - [DONE] Makes it accessible only from localhost
- - [DONE] Sets up root password (can be visible in git)
-- [ ] Create a Terraform module that:
-  - [ ] Creates 3 databases
-  - [ ] Creates 3 pairs of users (each with full access to one database)
-  - [ ] Creates 1 read-only user with access to all databases
-  - [ ] Manages secure passwords (must not be visible in git)
-  - [ ] Can use local terraform state
+- [x] Create a docker-compose.yml file that:
+ - [x] Runs a PostgreSQL database
+ - [x] Makes it accessible only from localhost
+ - [x] Sets up root password (can be visible in git)
+- [] Create a Terraform module that:
+  - [x] Creates 3 databases
+  - [x] Creates 3 pairs of users (each with full access to one database)
+  - [] Creates 1 read-only user with access to all databases
+  - [] Manages secure passwords (must not be visible in git)
+  - [] Can use local terraform state
 
 ## Task 2 - Multiple Deployments
 
-- [ ] Extend docker-compose.yml to:
-  - [ ] Run multiple PostgreSQL instances (suggested 3)
-  - [ ] Each instance on different ports
-  - [ ] Each instance simulates a separate deployment/AWS account
-- [ ] Apply the same Terraform configuration to each instance:
- - [ ] Same database and user structure
- - [ ] Unique passwords for each instance
- - [ ] Should be easily scalable to add more instances
+- [] Extend docker-compose.yml to:
+  - [] Run multiple PostgreSQL instances (suggested 3)
+  - [] Each instance on different ports
+  - [] Each instance simulates a separate deployment/AWS account
+- [] Apply the same Terraform configuration to each instance:
+ - [] Same database and user structure
+ - [] Unique passwords for each instance
+ - [] Should be easily scalable to add more instances
 
 ## Key Requirements:
 
-- [ ] Everything must run locally using Docker/Docker Compose
-- [ ] No cloud services should be used
-- [ ] Solution must be in a public git repository
-- [ ] All manual steps must be documented
-- [ ] Each task should be separate commits
+- [] Everything must run locally using Docker/Docker Compose
+- [] No cloud services should be used
+- [] Solution must be in a public git repository
+- [] All manual steps must be documented
+- [] Each task should be separate commits
 
       
 ## NICE TO HAVE

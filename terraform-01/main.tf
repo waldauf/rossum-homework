@@ -1,3 +1,7 @@
+# locals {
+#   name = readonly_user
+# }
+
 variable "postgres_root" {
   type        = string
   description = "postgres super user"
@@ -43,6 +47,7 @@ variable "user_database_map" {
 }
 
 # Geneate random password for users
+# https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
 resource "random_password" "user_passwords" {
   for_each = toset(
     concat(
@@ -59,12 +64,42 @@ output "all_users_passwords" {
   sensitive = true
 }
 
+# Create users
+# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role
+resource "postgresql_role" "app_users" {
+  for_each = var.user_database_map
 
+  name  = each.key
+  login = true
+  # password = random_passwords.app_users.[each.key].result
+  password = random_password.user_passwords[each.key].result
+}
+
+# Create databases
+# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_database
 resource "postgresql_database" "databases" {
   for_each = toset(var.database_names)
 
-  name  = each.key
-  owner = var.postgres_root
+  name = each.key
+  # Set as owner app_user or root ... what is recommanded way?
+  # owner = var.postgres_root
+  owner = lookup(var.user_database_map, each.key, var.postgres_root)
 }
 
 
+# Grant privileges to app users
+# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_grant
+resource "postgresql_grant" "app_users" {
+  for_each = var.user_database_map
+
+  database    = each.value
+  role        = each.key
+  schema      = "public"
+  object_type = "database"
+  privileges  = ["ALL"]
+
+  depends_on = [
+    postgresql_database.databases,
+    postgresql_role.app_users
+  ]
+}

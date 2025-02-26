@@ -1,0 +1,42 @@
+services:
+  # DEV environment PostgreSQL instance
+  postgres_dev:
+    image: postgres:16
+    container_name: postgres_dev
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres_db
+    ports:
+      - "127.0.0.1:5432:5432"  # Restrict access to localhost
+    volumes:
+      - ./postgres_data_dev:/var/lib/postgresql/data
+
+  # TEST environment PostgreSQL instance
+  postgres_test:
+    image: postgres:16
+    container_name: postgres_test
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres_db
+    ports:
+      - "127.0.0.1:5433:5432"  # Different host port
+    volumes:
+      - ./postgres_data_test:/var/lib/postgresql/data
+
+  # PROD environment PostgreSQL instance
+  postgres_prod:
+    image: postgres:16
+    container_name: postgres_prod
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres_db
+    ports:
+      - "127.0.0.1:5434:5432"  # Different host port
+    volumes:
+      - ./postgres_data_prod:/var/lib/postgresql/data

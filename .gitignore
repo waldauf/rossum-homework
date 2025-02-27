@@ -5,3 +5,4 @@
 **/.terraform.lock.hcl
 **/postgres_data*
 **/*.tfplan
+**/.terragrunt*

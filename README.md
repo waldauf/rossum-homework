@@ -17,6 +17,32 @@ Please publish your solution in a publicly available git repository. All code, s
 #### My improvements
 - [x] GitHub action for Terraform validation
 - [IN PROGRESS] Use Terragrunt for 2nd task
+ - branch: [terragrung](https://github.com/waldauf/rossum-homework/tree/terragrunt)
+    - Currently problems with downloading providers from Hashicorp
+      <details>
+        ```
+          23:24:10.579 STDOUT terraform: Initializing the backend...
+          23:24:10.615 STDOUT terraform: Initializing provider plugins...
+          23:24:10.615 STDOUT terraform: - Finding cyrilgdn/postgresql versions matching "~> 1.21.0"...
+          23:24:10.803 STDOUT terraform: - Finding hashicorp/random versions matching "3.6.3"...
+          23:24:35.602 STDOUT terraform: - Installing hashicorp/random v3.6.3...
+          23:24:36.087 STDOUT terraform: - Installed hashicorp/random v3.6.3 (signed by HashiCorp)
+          23:24:36.087 STDOUT terraform: ╷
+          23:24:36.087 STDOUT terraform: │ Error: Failed to install provider
+          23:24:36.087 STDOUT terraform: │
+          23:24:36.087 STDOUT terraform: │ Error while installing cyrilgdn/postgresql v1.21.0: could not query
+          23:24:36.087 STDOUT terraform: │ provider registry for registry.terraform.io/cyrilgdn/postgresql: failed to
+          23:24:36.087 STDOUT terraform: │ retrieve cryptographic signature for provider: the request failed after 2
+          23:24:36.087 STDOUT terraform: │ attempts, please try again later: Get
+          23:24:36.087 STDOUT terraform: │ "https://github.com/cyrilgdn/terraform-provider-postgresql/releases/download/v1.21.0/terraform-provider-postgresql_1.21.0_SHA256SUMS.sig":
+          23:24:36.087 STDOUT terraform: │ context deadline exceeded
+          23:24:36.087 STDOUT terraform: ╵
+          23:24:36.090 ERROR  terraform invocation failed in /home/waldauf/__JOB/__ROSSUM/rossum-homework/grunt-02/clusters/dev/.terragrunt-cache/rzHbUrxhpsx1alZf4xU4KDor6YU/mhGmks4mczjF3JZlKaF8nz364B4 error=[/home/waldauf/__JOB/__ROSSUM/rossum-homework/grunt-02/clusters/dev/.terragrunt-cache/rzHbUrxhpsx1alZf4xU4KDor6YU/mhGmks4mczjF3JZlKaF8nz36
+          4B4] exit status 1
+          23:24:36.090 ERROR  1 error occurred:
+                  * [/home/waldauf/__JOB/__ROSSUM/rossum-homework/grunt-02/clusters/dev/.terragrunt-cache/rzHbUrxhpsx1alZf4xU4KDor6YU/mhGmks4mczjF3JZlKaF8nz364B4] exit status 1
+        ```
+      </details>
 
 ### Task 1 - Single Deployment Setup
 
@@ -177,9 +203,6 @@ sudo rm -rf postgres_data*
 ```
 
 ## To consideration
-
-### Task 2 comments
-- There
 
 ### Used providers in Terraform
 - Use mainly official or supported providers by Hashicorp

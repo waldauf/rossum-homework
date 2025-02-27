@@ -178,9 +178,6 @@ sudo rm -rf postgres_data*
 
 ## To consideration
 
-### Task 2 comments
-- There
-
 ### Used providers in Terraform
 - Use mainly official or supported providers by Hashicorp
 

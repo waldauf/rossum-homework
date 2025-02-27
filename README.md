@@ -12,9 +12,11 @@ Please publish your solution in a publicly available git repository. All code, s
 - [x] No cloud services should be used
 - [x] Solution must be in a public git repository
 - [x] All manual steps must be documented
-- [] Each task should be separate commits
-  - [ ] Print of all commits before squashing
-  - [ ] Squash commits for each task
+- [x] Each task should be separate commits
+
+#### My improvements
+- [x] GitHub action for Terraform validation
+- [IN PROGRESS] Use Terragrunt for 2nd task
 
 ### Task 1 - Single Deployment Setup
 
@@ -174,7 +176,13 @@ docker-compose down
 sudo rm -rf postgres_data*
 ```
 
-## Recommendations for Production Use
+## To consideration
+
+### Task 2 comments
+- There
+
+### Used providers in Terraform
+- Use mainly official or supported providers by Hashicorp
 
 ### Password Storage
 - All passwords should be loaded during CD pipeline to:

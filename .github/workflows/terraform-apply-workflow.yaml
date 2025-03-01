@@ -47,13 +47,10 @@ jobs:
           name: task1-plan
           path: terraform-01/tfplan
 
-  plan-task2:
-    name: Plan Task 2 - ${{ matrix.environment }}
-    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == format('task2-{0}', matrix.environment) }}
+  plan-task2-dev:
+    name: Plan Task 2 - Dev
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-dev' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [dev, test, prod]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -66,25 +63,97 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd terraform-02/clusters/${{ matrix.environment }}
+          cd terraform-02/clusters/dev
           terraform init
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd terraform-02/clusters/${{ matrix.environment }}
+          cd terraform-02/clusters/dev
           terraform plan -out=tfplan
         continue-on-error: true
 
       - name: Upload Plan
         uses: actions/upload-artifact@v3
         with:
-          name: task2-${{ matrix.environment }}-plan
-          path: terraform-02/clusters/${{ matrix.environment }}/tfplan
+          name: task2-dev-plan
+          path: terraform-02/clusters/dev/tfplan
+
+  plan-task2-test:
+    name: Plan Task 2 - Test
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-test' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: |
+          cd terraform-02/clusters/test
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd terraform-02/clusters/test
+          terraform plan -out=tfplan
+        continue-on-error: true
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: task2-test-plan
+          path: terraform-02/clusters/test/tfplan
+
+  plan-task2-prod:
+    name: Plan Task 2 - Prod
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-prod' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: |
+          cd terraform-02/clusters/prod
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd terraform-02/clusters/prod
+          terraform plan -out=tfplan
+        continue-on-error: true
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: task2-prod-plan
+          path: terraform-02/clusters/prod/tfplan
 
   approve:
     name: Approval Required
-    needs: [plan-task1, plan-task2]
+    needs: [plan-task1, plan-task2-dev, plan-task2-test, plan-task2-prod]
+    if: >-
+      success() && (
+        github.event.inputs.environment == 'all' || 
+        github.event.inputs.environment == 'task1' || 
+        github.event.inputs.environment == 'task2-dev' || 
+        github.event.inputs.environment == 'task2-test' || 
+        github.event.inputs.environment == 'task2-prod'
+      )
     runs-on: ubuntu-latest
     environment: approval
     steps:
@@ -122,14 +191,11 @@ jobs:
           cd terraform-01
           terraform apply -auto-approve tfplan
 
-  apply-task2:
-    name: Apply Task 2 - ${{ matrix.environment }}
+  apply-task2-dev:
+    name: Apply Task 2 - Dev
     needs: approve
-    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == format('task2-{0}', matrix.environment) }}
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-dev' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [dev, test, prod]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -143,15 +209,77 @@ jobs:
       - name: Download Plan
         uses: actions/download-artifact@v3
         with:
-          name: task2-${{ matrix.environment }}-plan
-          path: terraform-02/clusters/${{ matrix.environment }}
+          name: task2-dev-plan
+          path: terraform-02/clusters/dev
 
       - name: Terraform Init
         run: |
-          cd terraform-02/clusters/${{ matrix.environment }}
+          cd terraform-02/clusters/dev
           terraform init
 
       - name: Terraform Apply
         run: |
-          cd terraform-02/clusters/${{ matrix.environment }}
+          cd terraform-02/clusters/dev
+          terraform apply -auto-approve tfplan
+
+  apply-task2-test:
+    name: Apply Task 2 - Test
+    needs: approve
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-test' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Download Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: task2-test-plan
+          path: terraform-02/clusters/test
+
+      - name: Terraform Init
+        run: |
+          cd terraform-02/clusters/test
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd terraform-02/clusters/test
+          terraform apply -auto-approve tfplan
+
+  apply-task2-prod:
+    name: Apply Task 2 - Prod
+    needs: approve
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task2-prod' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Download Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: task2-prod-plan
+          path: terraform-02/clusters/prod
+
+      - name: Terraform Init
+        run: |
+          cd terraform-02/clusters/prod
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd terraform-02/clusters/prod
           terraform apply -auto-approve tfplan

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -42,7 +42,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: task1-plan
           path: terraform-01/tfplan
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -74,7 +74,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: task2-dev-plan
           path: terraform-02/clusters/dev/tfplan
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -106,7 +106,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: task2-test-plan
           path: terraform-02/clusters/test/tfplan
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -138,7 +138,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: task2-prod-plan
           path: terraform-02/clusters/prod/tfplan
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -176,7 +176,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: task1-plan
           path: terraform-01
@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -207,7 +207,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: task2-dev-plan
           path: terraform-02/clusters/dev
@@ -229,7 +229,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -238,7 +238,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: task2-test-plan
           path: terraform-02/clusters/test
@@ -260,7 +260,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -269,7 +269,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: task2-prod-plan
           path: terraform-02/clusters/prod

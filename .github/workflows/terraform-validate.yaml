@@ -37,4 +37,4 @@ jobs:
     name: Validate Task 2 - each env
     uses: ./.github/workflows/terraform02-validate.yaml
     needs: call-shared-validation
-    
+

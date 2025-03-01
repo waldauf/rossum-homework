@@ -1,0 +1,40 @@
+name: Terraform Validation
+
+on:
+  push:
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+
+jobs:
+  call-shared-validation:
+    name: Validate Shared Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Settup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+
+      - name: Terraform Format Check
+        run: |
+          find . -name "*.tf" -type f -exec echo "Checking format for: {}" \; -exec terraform fmt -check {} \;
+
+  call-terraform01-workflows:
+    name: Validate Task 1
+    uses: ./.github/workflows/terraform01-validate.yaml
+    needs: call-shared-validation
+
+  call-terraform02-workflows:
+    name: Validate Task 2 - each env
+    uses: ./.github/workflows/terraform02-validate.yaml
+    needs: call-shared-validation
+

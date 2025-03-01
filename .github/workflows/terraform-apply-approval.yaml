@@ -1,0 +1,19 @@
+name: Terraform Apply with Approval
+
+on:
+  workflow_call:
+
+jobs:
+  terraform-plan:
+    name: Create Terraform Plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.11.0
+
+      

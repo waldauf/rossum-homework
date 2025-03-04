@@ -15,6 +15,19 @@ on:
           - task2-prod
 
 jobs:
+  approve:
+    name: Approval Required
+    needs: [plan-task1, plan-task2]
+    if: |
+      always() &&
+      (containes(needs.*.result, 'success') ||
+      containes(needs.*.result), 'skipped')
+    runs-on: ubuntu-latest
+    environment: approval
+    steps:
+      - name: Manual Approval
+        run: echo "Approved at $(date)"
+
   plan-task1:
     name: Plan Task 1
     if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task1' }}
@@ -82,18 +95,11 @@ jobs:
           name: task2-${{ matrix.environment }}-plan
           path: terraform-02/clusters/${{ matrix.environment }}/tfplan
 
-  approve:
-    name: Approval Required
-    needs: [plan-task1, plan-task2]
-    runs-on: ubuntu-latest
-    environment: approval
-    steps:
-      - name: Manual Approval
-        run: echo "Approved at $(date)"
-
   apply-task1:
     name: Apply Task 1
-    needs: approve
+    needs: [approve, plan-task2]
+    if: |
+      needs
     if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'task1' }}
     runs-on: ubuntu-latest
     steps:

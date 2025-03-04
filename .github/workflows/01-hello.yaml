@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - gh-lessons
   pull_request:
     branches:
       - main
+      - gh-lessons
 
   # Manual trigger
   workflow_dispatch:

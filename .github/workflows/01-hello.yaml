@@ -1,0 +1,31 @@
+name: Hello GHA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+  # Manual trigger
+  workflow_dispatch:
+
+jobs:
+  hello-hell:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Hello Hell
+        uses: echo "Hello, Hell Actions!"
+
+      - name: List of files where I am
+        uses: |
+          ls -la
+          ls -ld ${PWD}
+          
+          
+    
